@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 
-INPUT_FILE = r"C:\Users\cassi\Downloads\Var-Spy-daily_raw_data.csv"
+INPUT_FILE = r"data\Var-Spy-daily_raw_data.csv"
 RETURN_TYPE = "log"
 PORTFOLIO_VALUE = 1_000_000
 CONFIDENCE_LEVEL = 0.99
