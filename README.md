@@ -1,87 +1,132 @@
 # fim500-var-models
 
-FIM 500, Fall 2026. We estimate the 1-day 99% Value-at-Risk of a hypothetical $1,000,000 long SPY
-portfolio with several VaR methods, then validate each model independently (conceptual soundness,
-implementation, benchmarking, backtesting and sensitivity).
+FIM 500, Fall 2026.
 
-## Common specification
+## Project objective
+
+We estimate the 1-day 99% Value-at-Risk (VaR) of a long SPY portfolio with three methods: Historical
+Simulation, Parametric (Normal) and EWMA. Each model is then validated independently for conceptual
+soundness, implementation, benchmarking, backtesting and sensitivity. The goal at this stage is to build
+comparable models on the same data and specification. We have not yet concluded which model is best.
+
+## Portfolio specification
 
 | Item | Specification |
 |---|---|
-| Underlying | SPY, daily |
-| Data | Bloomberg `PX_LAST`, Jan 2010 to Aug 31, 2026 (frozen) |
+| Portfolio | $1,000,000 long SPY, held at a constant $1M exposure |
+| Horizon | 1 trading day |
+| Confidence level | 99% |
+| Daily P&L | $1,000,000 x daily SPY return |
 | Returns | Simple, price-only (dividends excluded) |
-| Horizon / confidence | 1 day / 99% |
 | Initialization | First 250 returns |
-| Estimation window | Rolling 250 trading days (Historical, Parametric) |
 | Backtesting period | Dec 31, 2010 to Aug 31, 2026 |
 | VaR sign convention | Positive dollar loss threshold |
 
 ## Models
 
-| Model | Developer | Script |
-|---|---|---|
-| Historical Simulation | Cassie Wan | in progress on branch `cassie-historical-simulation-var` |
-| Parametric (Normal) | Thomas Flaim | `notebooks/03_Parametric_VaR/parametric_var.py` |
-| EWMA (λ = 0.94) | Sai Vakkalagadda | `notebooks/EWMA_VaR/ewma_var.py` |
-| GARCH(1,1) (optional) | unassigned | not yet added |
+| # | Model | Method | Script |
+|---|---|---|---|
+| 01 | Historical Simulation | 1st percentile of the last 250 days of P&L. The script also computes an age-weighted version (lambda = 0.97). | `notebooks/01_historical_var/historical_var.py` |
+| 02 | Parametric (Normal) | Rolling 250-day mean and standard deviation of returns, VaR = $1M x (2.326 x sigma - mu) | `notebooks/02_parametric_var/parametric_var.py` |
+| 03 | EWMA | RiskMetrics variance with lambda = 0.94 and a zero mean, VaR = $1M x 2.326 x sigma | `notebooks/03_ewma_var/ewma_var.py` |
 
-Project lead: Soham Joshi.
+Each forecast uses only data available before that day. All three models make their first forecast on
+Dec 31, 2010, after the 250-return initialization period.
 
-## Repository layout
+The Historical Simulation script currently uses log returns (`RETURN_TYPE = "log"`), while the other two
+use simple returns as the specification requires.
+
+## Dataset and source
+
+| File | Contents |
+|---|---|
+| `data/spy_daily_raw.csv` | SPY daily prices from Bloomberg (`PX_LAST` as `Last Price`, plus high, low and open). Unmodified export. |
+| `data/vix_daily_raw.csv` | VIX daily levels from Bloomberg. Used for context only, not as a model input. |
+
+The dataset is frozen at Aug 31, 2026 and every model filters it to Jan 2010 onward.
+
+- The SPY export starts in Dec 2004 and is sorted newest first. Rows from 12/10/2004 to 2/16/2005 contain
+  VIX values by mistake, and the 2010 start-date filter drops them.
+- `Last Price` is the unadjusted close, so returns exclude dividends. Ex-dividend days show a small
+  artificial drop of about 0.3% to 0.4%.
+
+## Folder structure
+
+Folders and files use lowercase snake_case. Model folders are numbered in the order above, and every output
+starts with the model name.
 
 ```
 data/
-  Var-Spy-daily_raw_data.csv     Bloomberg export, unmodified
-  Var-VIX-daily_raw_data.csv     Bloomberg export, unmodified (context only)
+  spy_daily_raw.csv
+  vix_daily_raw.csv
 notebooks/
-  03_Parametric_VaR/             one folder per model
-  EWMA_VaR/
-results/                         model output CSVs and charts (<model>_var_output.csv, *.png)
+  01_historical_var/historical_var.py
+  02_parametric_var/parametric_var.py
+  03_ewma_var/ewma_var.py
+results/
+  historical_var_output.csv
+  parametric_var_output.csv
+  ewma_var_output.csv
+  figures/
+    historical_var_equal_weighted.png
+    historical_var_age_weighted.png
+    parametric_var_over_time.png
+    parametric_var_vs_pnl.png
+    ewma_var_vs_pnl.png
+    ewma_var_covid.png
+    ewma_vol_vs_vix.png
+requirements.txt
+README.md
 ```
 
-## Data notes
-
-- The SPY file starts in Dec 2004 and is sorted newest first. Rows from 12/10/2004 to 2/16/2005 contain
-  VIX values by mistake, and the 2010 start-date filter drops them.
-- `Last Price` is the unadjusted close, so returns exclude dividends.
-- VIX is not a model input. The EWMA script uses it for one chart that compares EWMA volatility with
-  implied volatility and marks the stress periods.
+New work should follow the same pattern: `notebooks/NN_<model>_var/<model>_var.py`, output in
+`results/<model>_var_output.csv`, and charts in `results/figures/<model>_var_<description>.png`.
 
 ## How to run
 
-Requires Python 3 with pandas, numpy and matplotlib. The parametric model also needs scipy.
+You need Python 3. Install the packages once:
 
 ```
-pip install pandas numpy matplotlib scipy
-python notebooks/03_Parametric_VaR/parametric_var.py
-python notebooks/EWMA_VaR/ewma_var.py
+pip install -r requirements.txt
 ```
 
-Run both from the repository root. The parametric script uses paths relative to the working directory;
-the EWMA script resolves its paths from its own location. Each script writes its output CSV and charts
-to `results/`.
-
-## EWMA model notes
-
-The variance forecast for day t uses returns through day t-1 only:
+Run each model from the repository root, because the scripts read from `data/` and write to `results/`
+using paths relative to the root:
 
 ```
-sigma2[t] = 0.94 * sigma2[t-1] + 0.06 * r[t-1]**2
-VaR[t]    = $1,000,000 * 2.326 * sigma[t]
+python notebooks/01_historical_var/historical_var.py
+python notebooks/02_parametric_var/parametric_var.py
+python notebooks/03_ewma_var/ewma_var.py
 ```
 
-The recursion starts from the mean squared return of the first 250 returns, so the first forecast falls
-on Dec 31, 2010, the same date as the parametric model. The conditional mean is set to zero. A day is an
-exception when the realized loss exceeds that day's VaR.
+Each script prints its implementation checks and overwrites its own CSV and charts in `results/`. The
+Historical and Parametric scripts open each chart in a window, and the script continues once you close it.
+The EWMA script saves its charts without displaying them.
 
-Output columns in `results/ewma_var_output.csv`: `Date`, `Last Price`, `SPY_Return`, `Portfolio_PnL`,
-`EWMA_Volatility`, `VaR_99`, `Loss`, `Exception`.
+## Team and model assignments
 
-Known limitations (preliminary):
+| Role | Name | GitHub |
+|---|---|---|
+| Project lead | Soham Joshi | `sohamjoshi1998` |
+| Historical Simulation VaR | Cassie Wan | `cassiemwan` |
+| Parametric VaR | Thomas Flaim | `Tflaim23` |
+| EWMA VaR, repository structure and README | Sai Vakkalagadda | `subhash-vakkalagadda` |
 
-- Normal quantiles can understate 99% losses because SPY returns have fat tails.
-- λ = 0.94 is the RiskMetrics convention for daily data and isn't calibrated to SPY.
-- Up and down moves of the same size raise variance equally, so there is no leverage effect.
-- Volatility adjusts only after a shock has been observed, and there is no long-run variance level to
-  revert to (GARCH has one).
+## Current project workflow
+
+1. Each piece of work lives on its own branch, named after the owner and the task (for example
+   `thomas-parametric-var`).
+2. When it is ready, the owner opens a pull request into `main`. The project lead reviews and merges it.
+3. Scripts and their outputs are committed together, so `results/` always matches the code on `main`.
+
+Model development is done for all three models. The open tasks are:
+
+- Model comparison: combine the three outputs by date into `combined_var_results.csv`, and chart the three
+  VaR series over the full backtesting period and over one stress period.
+- EDA and presentation figures: SPY price and return trends, the return distribution, rolling volatility
+  and the main stress periods, with a few observations on what they mean for the models.
+- Model documentation for each model: development summary, methodology, key assumptions, parameters,
+  rolling VaR chart and known limitations.
+
+Formal backtesting (Kupiec and Christoffersen tests) and the rest of the independent validation come after
+these tasks.

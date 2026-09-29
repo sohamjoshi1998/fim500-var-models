@@ -10,7 +10,7 @@ CONFIDENCE_LEVEL = 0.99
 Z_SCORE = norm.ppf(CONFIDENCE_LEVEL)
 
 # Load SPY data
-spy = pd.read_csv("data/Var-Spy-daily_raw_data.csv")
+spy = pd.read_csv("data/spy_daily_raw.csv")
 
 # Convert Date column to datetime
 spy["Date"] = pd.to_datetime(spy["Date"])
@@ -75,7 +75,7 @@ model_output = spy.loc[
 ].copy()
 
 # Create results folder if it does not already exist
-os.makedirs("results", exist_ok=True)
+os.makedirs("results/figures", exist_ok=True)
 
 # Save output to the results folder
 model_output.to_csv(
@@ -106,7 +106,7 @@ plt.tight_layout()
 
 # Save VaR chart
 plt.savefig(
-    "results/parametric_var_over_time.png",
+    "results/figures/parametric_var_over_time.png",
     dpi=300,
     bbox_inches="tight"
 )
@@ -140,7 +140,7 @@ plt.tight_layout()
 
 # Save P&L vs VaR chart
 plt.savefig(
-    "results/parametric_var_vs_pnl.png",
+    "results/figures/parametric_var_vs_pnl.png",
     dpi=300,
     bbox_inches="tight"
 )
