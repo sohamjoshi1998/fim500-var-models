@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 
-INPUT_FILE = r"data\Var-Spy-daily_raw_data.csv"
+INPUT_FILE = "data/spy_daily_raw.csv"
 RETURN_TYPE = "log"
 PORTFOLIO_VALUE = 1_000_000
 CONFIDENCE_LEVEL = 0.99
@@ -104,11 +104,11 @@ print(f"Age-weighted VaR added (lambda={AGE_WEIGHT_LAMBDA})")
 print(model_df[["SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].head())
 
 ## Create results folder
-os.makedirs("results", exist_ok=True)
+os.makedirs("results/figures", exist_ok=True)
 
 ## Output results to CSV
 output = model_df[["SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].copy()
-output.to_csv("results/hs_var_daily_output.csv", index=False)
+output.to_csv("results/historical_var_output.csv", index=False)
 print(output.head())
 print(output.tail())
 
@@ -121,7 +121,7 @@ ax.set_ylabel("$ Loss")
 ax.legend(loc="upper left", fontsize=9)
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig("results/equal_weighted_var_vs_losses.png", dpi=150)
+plt.savefig("results/figures/historical_var_equal_weighted.png", dpi=150)
 plt.show()
 
 ## Plot Age-Weighted Historical Simulation VaR against P&L
@@ -133,7 +133,7 @@ ax.set_ylabel("$ Loss")
 ax.legend(loc="upper left", fontsize=9)
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig("results/age_weighted_var_vs_losses.png", dpi=150)
+plt.savefig("results/figures/historical_var_age_weighted.png", dpi=150)
 plt.show()
 
 ## Sanity checks

@@ -9,9 +9,10 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-RAW_SPY = ROOT / "data" / "Var-Spy-daily_raw_data.csv"
-RAW_VIX = ROOT / "data" / "Var-VIX-daily_raw_data.csv"   # context only, not a model input
+RAW_SPY = ROOT / "data" / "spy_daily_raw.csv"
+RAW_VIX = ROOT / "data" / "vix_daily_raw.csv"   # context only, not a model input
 RESULTS = ROOT / "results"
+FIGURES = RESULTS / "figures"
 OUTPUT = RESULTS / "ewma_var_output.csv"
 
 PORTFOLIO_VALUE = 1_000_000
@@ -180,7 +181,7 @@ def main() -> None:
     sigma2 = ewma_variance(r)
     results = build_results(spy, sigma2)
 
-    RESULTS.mkdir(parents=True, exist_ok=True)
+    FIGURES.mkdir(parents=True, exist_ok=True)
     results.to_csv(OUTPUT, index=False)
     print(f"First forecast date: {results['Date'].iloc[0]:%Y-%m-%d}   rows: {len(results):,}")
     print(f"Saved to: {OUTPUT.relative_to(ROOT).as_posix()}")
@@ -191,11 +192,11 @@ def main() -> None:
     print(summarize(results).to_string(), "\n")
     print(by_year(results).to_string(), "\n")
 
-    plot_var(results, "EWMA 1-day 99% VaR vs daily P&L, $1M SPY", RESULTS / "ewma_var_vs_pnl.png")
+    plot_var(results, "EWMA 1-day 99% VaR vs daily P&L, $1M SPY", FIGURES / "ewma_var_vs_pnl.png")
     covid = results[(results["Date"] >= "2020-01-01") & (results["Date"] <= "2020-06-30")]
-    plot_var(covid, "COVID stress period (Jan to Jun 2020)", RESULTS / "ewma_var_covid.png")
-    plot_vol_vs_vix(results, RESULTS / "ewma_vol_vs_vix.png")
-    print("Figures saved to: results/ewma_var_vs_pnl.png, results/ewma_var_covid.png, results/ewma_vol_vs_vix.png")
+    plot_var(covid, "COVID stress period (Jan to Jun 2020)", FIGURES / "ewma_var_covid.png")
+    plot_vol_vs_vix(results, FIGURES / "ewma_vol_vs_vix.png")
+    print("Figures saved to: results/figures/ewma_*.png")
 
 
 if __name__ == "__main__":
