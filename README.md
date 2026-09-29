@@ -23,7 +23,7 @@ implementation, benchmarking, backtesting and sensitivity).
 |---|---|---|
 | Historical Simulation | Cassie Wan | in progress on branch `cassie-historical-simulation-var` |
 | Parametric (Normal) | Thomas Flaim | `notebooks/03_Parametric_VaR/parametric_var.py` |
-| EWMA (λ = 0.94) | Sai Vakkalagadda | `notebooks/04_EWMA_VaR/ewma_var.py` |
+| EWMA (λ = 0.94) | Sai Vakkalagadda | `notebooks/EWMA_VaR/ewma_var.py` |
 | GARCH(1,1) (optional) | unassigned | not yet added |
 
 Project lead: Soham Joshi.
@@ -36,7 +36,7 @@ data/
   Var-VIX-daily_raw_data.csv     Bloomberg export, unmodified (context only)
 notebooks/
   03_Parametric_VaR/             one folder per model
-  04_EWMA_VaR/
+  EWMA_VaR/
 results/                         model output CSVs and charts (<model>_var_output.csv, *.png)
 ```
 
@@ -55,7 +55,7 @@ Requires Python 3 with pandas, numpy and matplotlib. The parametric model also n
 ```
 pip install pandas numpy matplotlib scipy
 python notebooks/03_Parametric_VaR/parametric_var.py
-python notebooks/04_EWMA_VaR/ewma_var.py
+python notebooks/EWMA_VaR/ewma_var.py
 ```
 
 Run both from the repository root. The parametric script uses paths relative to the working directory;
