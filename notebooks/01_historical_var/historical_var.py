@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 INPUT_FILE = "data/spy_daily_raw.csv"
-RETURN_TYPE = "log"
 PORTFOLIO_VALUE = 1_000_000
 CONFIDENCE_LEVEL = 0.99
 FORECAST_HORIZON = 1 
@@ -47,19 +46,16 @@ print(spy.head())
 
 ## Calculate returns
 price = spy["Last Price"]
-if RETURN_TYPE == "log":
-    spy["SPY Return"] = np.log(price / price.shift(1))
-else:
-    spy["SPY Return"] = price.pct_change()
+spy["SPY_Return"] = price.pct_change()
 
 ## Calculate P&L
-spy["Portfolio P&L"] = PORTFOLIO_VALUE * spy["SPY Return"]
-spy = spy.dropna(subset=["SPY Return", "Portfolio P&L"]).reset_index(drop=True)
+spy["Portfolio_PnL"] = PORTFOLIO_VALUE * spy["SPY_Return"]
+spy = spy.dropna(subset=["SPY_Return", "Portfolio_PnL"]).reset_index(drop=True)
 
 ret_df = spy.set_index("Date")
-pnl = ret_df["Portfolio P&L"]
+pnl = ret_df["Portfolio_PnL"]
 print(f"Return series: {len(ret_df)} observations")
-print(ret_df[["Last Price", "SPY Return", "Portfolio P&L"]].head())
+print(ret_df[["Last Price", "SPY_Return", "Portfolio_PnL"]].head())
 
 ## Set up quartile based off of confidence level
 pct = (1 - CONFIDENCE_LEVEL) * 100
@@ -73,11 +69,11 @@ for t in range(WINDOW, len(pnl)):
     dates.append(pnl.index[t])
 
 ## Create dataframe with VaR results
-var_df = pd.DataFrame({"VaR": var_dollar}, index=pd.Index(dates, name="Date"))
+var_df = pd.DataFrame({"VaR_99": var_dollar}, index=pd.Index(dates, name="Date"))
 model_df = ret_df.join(var_df, how="inner")
 print(f"First VaR forecast: {model_df.index[0].date()}  (expected ~Jan 2011 per spec)")
 print(f"VaR series length : {len(model_df)} observations")
-print(model_df[["SPY Return", "Portfolio P&L", "VaR"]].head())
+print(model_df[["SPY_Return", "Portfolio_PnL", "VaR_99"]].head())
 
 ## Create age-weighted historical simulation model, chose decay factor of 0.97 for now
 raw_weights = AGE_WEIGHT_LAMBDA ** np.arange(WINDOW)
@@ -98,42 +94,42 @@ for t in range(WINDOW, len(pnl)):
     age_var_dollar.append(-q)
     age_dates.append(pnl.index[t])
 
-age_var_df = pd.DataFrame({"VaR (Age-Weighted)": age_var_dollar}, index=pd.Index(age_dates, name="Date"))
+age_var_df = pd.DataFrame({"VaR_AW": age_var_dollar}, index=pd.Index(age_dates, name="Date"))
 model_df = model_df.join(age_var_df, how="inner")
 print(f"Age-weighted VaR added (lambda={AGE_WEIGHT_LAMBDA})")
-print(model_df[["SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].head())
+print(model_df[["SPY_Return", "Portfolio_PnL", "VaR_99", "VaR_AW"]].head())
 
 ## Create results folder
 os.makedirs("results/figures", exist_ok=True)
 
 ## Output results to CSV
-output = model_df[["Last Price", "SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].copy()
+output = model_df[["Last Price", "SPY_Return", "Portfolio_PnL", "VaR_99", "VaR_AW"]].copy()
 output.to_csv("results/historical_var_output.csv", index=True)
 print(output.head())
 print(output.tail())
 
 ## Plot Equal-Weighted Historical Simulation VaR against P&L
 fig, ax = plt.subplots(figsize=(12, 4))
-ax.plot(model_df.index, -model_df["Portfolio P&L"], color="black", lw=0.6, label="Realized daily loss ($)")
-ax.plot(model_df.index, model_df["VaR"], color="red", lw=1.3, label="99% Equal-Weighted HS VaR ($)")
-ax.set_title("250-Day Equal-Weighted Historical Simulation VaR vs. Realized Losses")
-ax.set_ylabel("$ Loss")
+ax.plot(model_df.index, model_df["Portfolio_PnL"], color="black", lw=0.6, label="Daily Portfolio P&L")
+ax.plot(model_df.index, -model_df["VaR_99"], color="red", lw=1.3, label="99% Equal-Weighted HS VaR ($)")
+ax.set_title("250-Day Equal-Weighted Historical Simulation VaR vs. P&L")
+ax.set_ylabel("P&L ($)")
 ax.legend(loc="upper left", fontsize=9)
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig("results/figures/historical_var_equal_weighted.png", dpi=150)
+plt.savefig("results/figures/historical_var_vs_pnl.png", dpi=150)
 plt.show()
 
 ## Plot Age-Weighted Historical Simulation VaR against P&L
 fig, ax = plt.subplots(figsize=(12, 4))
-ax.plot(model_df.index, -model_df["Portfolio P&L"], color="black", lw=0.6, label="Realized daily loss ($)")
-ax.plot(model_df.index, model_df["VaR (Age-Weighted)"], color="red", lw=1.3, label="VaR (Age-Weighted) ($)")
-ax.set_title("250-Day Age-Weighted Historical Simulation VaR vs. Realized Losses")
-ax.set_ylabel("$ Loss")
+ax.plot(model_df.index, model_df["Portfolio_PnL"], color="black", lw=0.6, label="Daily Portfolio P&L")
+ax.plot(model_df.index, -model_df["VaR_AW"], color="red", lw=1.3, label="99% Age-Weighted HS VaR ($)")
+ax.set_title("250-Day Age-Weighted Historical Simulation VaR vs P&L")
+ax.set_ylabel("P&L ($)")
 ax.legend(loc="upper left", fontsize=9)
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig("results/figures/historical_var_age_weighted.png", dpi=150)
+plt.savefig("results/figures/historical_var_aw_vs_pnl.png", dpi=150)
 plt.show()
 
 ## Sanity checks
@@ -158,8 +154,8 @@ checks.append(("Portfolio value consistently $1,000,000", PORTFOLIO_VALUE == 1_0
 checks.append(("Confidence level = 99%", CONFIDENCE_LEVEL == 0.99))
 
 ## VaR reported as a positive dollar loss threshold
-checks.append(("VaR reported as positive $ loss for all obs", bool((model_df["VaR"] > 0).all())))
-checks.append(("Age-weighted VaR reported as positive $ loss for all obs", bool((model_df["VaR (Age-Weighted)"] > 0).all())))
+checks.append(("VaR reported as positive $ loss for all obs", bool((model_df["VaR_99"] > 0).all())))
+checks.append(("Age-weighted VaR reported as positive $ loss for all obs", bool((model_df["VaR_AW"] > 0).all())))
 
 ## Missing values limited to necessary initialization periods
 missing_after_warmup = ret_df["SPY Return"].iloc[WINDOW:].isna().sum()
