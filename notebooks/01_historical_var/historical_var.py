@@ -107,8 +107,8 @@ print(model_df[["SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].hea
 os.makedirs("results/figures", exist_ok=True)
 
 ## Output results to CSV
-output = model_df[["SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].copy()
-output.to_csv("results/historical_var_output.csv", index=False)
+output = model_df[["Last Price", "SPY Return", "Portfolio P&L", "VaR", "VaR (Age-Weighted)"]].copy()
+output.to_csv("results/historical_var_output.csv", index=True)
 print(output.head())
 print(output.tail())
 
