@@ -89,18 +89,19 @@ print(model_output.head())
 print(f"\nOutput rows saved: {len(model_output)}")
 print("Saved to: results/parametric_var_output.csv")
 
-# Plot daily 99% VaR over time
+# Plot daily 99% VaR over time, displayed as a negative loss threshold
 plt.figure(figsize=(12, 6))
 
 plt.plot(
     model_output["Date"],
-    model_output["VaR_99"]
+    -model_output["VaR_99"]
 )
 
+plt.axhline(0, color="black", linewidth=0.6)
 plt.title("1-Day 99% Parametric VaR for $1M SPY Portfolio")
 plt.xlabel("Date")
 plt.ylabel("VaR ($)")
-plt.grid(True)
+plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
 
@@ -120,21 +121,25 @@ plt.plot(
     model_output["Date"],
     model_output["Portfolio_PnL"],
     label="Daily Portfolio P&L",
-    linewidth=0.8
+    color="black",
+    linewidth=0.8,
+    alpha=0.7
 )
 
 plt.plot(
     model_output["Date"],
     -model_output["VaR_99"],
-    label="99% VaR Threshold",
+    label="99% Parametric VaR",
     linewidth=1.2
 )
+
+plt.axhline(0, color="black", linewidth=0.6)
 
 plt.title("Daily Portfolio P&L vs. 99% Parametric VaR")
 plt.xlabel("Date")
 plt.ylabel("Dollar P&L ($)")
 plt.legend()
-plt.grid(True)
+plt.grid(True, alpha=0.3)
 
 plt.tight_layout()
 
