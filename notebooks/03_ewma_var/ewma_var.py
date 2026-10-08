@@ -130,14 +130,15 @@ def by_year(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def plot_var(df: pd.DataFrame, title: str, path: Path) -> None:
-    exc = df[df["Exception"]]
+    # VaR is drawn as a negative number so it sits on the loss side of the P&L bars.
+    # Exceptions are not marked; counting them belongs to validation.
     fig, ax = plt.subplots(figsize=(12, 5))
-    ax.bar(df["Date"], df["Portfolio_PnL"], width=1.0, color="0.65", label="Daily P&L")
-    ax.plot(df["Date"], -df["VaR_99"], color="tab:blue", lw=1.2, label="-VaR 99% (EWMA)")
-    ax.scatter(exc["Date"], exc["Portfolio_PnL"], color="tab:red", s=18, zorder=3,
-               label=f"Exceptions ({len(exc)})")
-    ax.axhline(0, color="0.3", lw=0.5)
+    ax.bar(df["Date"], df["Portfolio_PnL"], width=1.0, color="black", edgecolor="black", lw=0.4,
+           label="Daily P&L")
+    ax.plot(df["Date"], -df["VaR_99"], color="tab:green", lw=1.4, label="99% VaR, EWMA (shown as a loss)")
+    ax.axhline(0, color="0.2", lw=0.5)
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"${v/1000:,.0f}k"))
+    ax.set_ylabel("Daily P&L and VaR ($)")
     ax.set_title(title)
     ax.legend(loc="lower left")
     fig.tight_layout()
