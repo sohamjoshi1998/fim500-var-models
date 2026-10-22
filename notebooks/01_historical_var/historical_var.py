@@ -132,6 +132,19 @@ plt.tight_layout()
 plt.savefig("results/figures/historical_var_aw_vs_pnl.png", dpi=150)
 plt.show()
 
+## Plot Equal-Weighted and Age-Weighted Historical Simulation VaR against P&L
+fig, ax = plt.subplots(figsize=(12, 4))
+ax.plot(model_df.index, model_df["Portfolio_PnL"], color="black", lw=0.6, label="Daily Portfolio P&L")
+ax.plot(model_df.index, -model_df["VaR_99"], color="red", lw=1, label="99% Equal-Weighted HS VaR ($)")
+ax.plot(model_df.index, -model_df["VaR_AW"], color="blue", lw=1, label="99% Age-Weighted HS VaR ($)")
+ax.set_title("250-Day VaR: Equal-Weighted vs. Age-Weighted")
+ax.set_ylabel("P&L ($)")
+ax.legend(loc="upper left", fontsize=9)
+ax.grid(alpha=0.3)
+plt.tight_layout()
+plt.savefig("results/figures/historical_comparison.png", dpi=150)
+plt.show()
+
 ## Sanity checks
 checks = []
 
@@ -145,7 +158,7 @@ checks.append(("Dates sorted chronologically", bool(dates_sorted)))
 checks.append(("No duplicate dates in VaR output", bool(no_dupe_dates)))
 
 ## Every VaR date has a corresponding return and P&L
-checks.append(("Every VaR date has aligned SPY Return & Portfolio P&L", bool(model_df[["SPY Return", "Portfolio P&L"]].notna().all().all())))
+checks.append(("Every VaR date has aligned SPY Return & Portfolio P&L", bool(model_df[["SPY_Return", "Portfolio_PnL"]].notna().all().all())))
 
 ## Portfolio value consistently $1,000,000
 checks.append(("Portfolio value consistently $1,000,000", PORTFOLIO_VALUE == 1_000_000))
@@ -158,7 +171,7 @@ checks.append(("VaR reported as positive $ loss for all obs", bool((model_df["Va
 checks.append(("Age-weighted VaR reported as positive $ loss for all obs", bool((model_df["VaR_AW"] > 0).all())))
 
 ## Missing values limited to necessary initialization periods
-missing_after_warmup = ret_df["SPY Return"].iloc[WINDOW:].isna().sum()
+missing_after_warmup = ret_df["SPY_Return"].iloc[WINDOW:].isna().sum()
 checks.append((f"No missing returns after the {WINDOW}-day initialization period", missing_after_warmup == 0))
 
 print(f"{'Check':<55} Result")
