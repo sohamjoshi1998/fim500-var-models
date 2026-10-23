@@ -1,0 +1,3 @@
+Test,Test_Statistic,p_value,Result_at_5pct
+Kupiec POF,49.86332438160571,1.648371762385197e-12,Reject H0
+Christoffersen Independence,7.598476031767518,0.00584176576726815,Reject H0
