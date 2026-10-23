@@ -1,0 +1,19 @@
+{
+  "commit": "bd49450e23f0a4d64703ba90298ceb4cc8e8ccf5",
+  "repository": "https://github.com/sohamjoshi1998/fim500-var-models",
+  "analysis_date": "2026-10-23",
+  "python": "3.12.10",
+  "numpy": "2.5.3",
+  "pandas": "3.0.6",
+  "scipy": "1.18.1",
+  "hash_convention": "SHA-256; CSV/Python line endings normalized to LF",
+  "files": {
+    "data/spy_daily_raw.csv": "3957191928f70983d3d68e7c1d82667230d48d0f3a02c23957c7b29f3542f0af",
+    "results/ewma_var_output.csv": "3fcb54751ab7cd97ff384ddb30bc277f63fa1f109e197b449da4cd5653fde60f",
+    "results/garch_var_output.csv": "7561a3b4ffa7235203cbad333461b86c7166406e0f84fa7d0219b9abca9e0d44",
+    "results/historical_var_output.csv": "067e2b65691baee0e175bf436e4acb18a3240ac44650b84d9911bbc7a6ba806e",
+    "results/parametric_var_output.csv": "ae4ca9dadec607e5aee9cbd8bf2482ff0a22064849deb748ad61aae0992ec7f1",
+    "notebooks/01_historical_var/historical_var.py": "7c8a59e648dda52b5e5c8600903e63cd9d8b439cb5e3eb7913e01a1ce7113716",
+    "documentation/historical_var_model_development_summary.docx": "d1ea9675c1f5f370772868c552c0137b7fe09ba7e47a5a5d76b3fff7dfebf120"
+  }
+}

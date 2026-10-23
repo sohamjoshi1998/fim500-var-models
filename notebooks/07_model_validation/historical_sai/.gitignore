@@ -1,0 +1,10 @@
+# Only the six package files below belong in Git; the PDF is under documentation.
+*
+!.gitignore
+!README.md
+!baseline_commit.txt
+!requirements_validation.txt
+!Historical_Backtesting_Benchmarking_Sai.ipynb
+!results/
+results/*
+!results/provenance.json
