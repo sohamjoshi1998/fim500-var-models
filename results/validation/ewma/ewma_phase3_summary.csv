@@ -1,0 +1,9 @@
+Metric,Value
+Baseline Lambda,0.94
+Baseline Average VaR,21915.043270598217
+Baseline Maximum VaR,118677.24769666803
+Average VaR Range Across Lambdas,2229.504638781491
+Lowest Exception Rate Across Lambdas,0.020817466362020816
+Highest Exception Rate Across Lambdas,0.024117796395024118
+Baseline COVID Exceptions,6.0
+Baseline Match Maximum Difference,1.4551915228366852e-11
