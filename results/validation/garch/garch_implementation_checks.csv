@@ -1,0 +1,14 @@
+Check,Result
+Raw dataset available,True
+GARCH output available,True
+Combined benchmark output available,True
+Project dates sorted,True
+No duplicate project dates,True
+No missing Last Price,True
+All project prices positive,True
+GARCH output dates sorted,True
+No duplicate GARCH dates,True
+Normal GARCH VaR positive,True
+Student-t GARCH VaR positive,True
+GARCH and benchmark row counts match,True
+GARCH and benchmark dates match,True

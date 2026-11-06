@@ -1,0 +1,15 @@
+Metric,Value
+Baseline model,"Student-t GARCH(1,1)"
+Baseline window,250 trading days
+Baseline refit frequency,Every 5 trading days
+Observations,3939
+Average VaR,22982.141837900286
+Maximum VaR,228202.4754591754
+Exceptions,79
+Exception rate,0.020055851739020056
+Kupiec p-value,2.398784532919112e-08
+Christoffersen p-value,0.09847460688207461
+COVID exceptions,2
+COVID exception rate,0.03225806451612903
+Persistence >= 1 count,305
+Persistence >= 1 rate,0.07743082000507744
